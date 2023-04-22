@@ -6,11 +6,11 @@ from data_utils import DiffAST, DiffExample, DiffASTExample, CommentCategory
 
 PARTITIONS = ['train', 'valid', 'test']
 
-def get_data_splits(comment_type_str=None, ignore_ast=False):
+def get_data_splits(comment_type_str=None, ignore_ast=False, skip_high_level=False):
     """Retrieves train/validation/test sets for the given comment_type_str.
        comment_type_str -- Return, Param, Summary, or None (if None, uses all comment types)
        ignore_ast -- Skip loading ASTs (they take a long time)"""
-    dataset, high_level_details = load_processed_data(comment_type_str, ignore_ast)
+    dataset, high_level_details = load_processed_data(comment_type_str, ignore_ast, skip_high_level)
     train_examples = dataset['train']
     valid_examples = dataset['valid']
     test_examples = dataset['test']
@@ -31,7 +31,7 @@ def load_cleaned_test_set(comment_type_str=None):
             test_ids.extend(json.load(f))
     return test_ids
 
-def load_processed_data(comment_type_str, ignore_ast):
+def load_processed_data(comment_type_str, ignore_ast, skip_high_level):
     """Processes saved data for the given comment_type_str.
        comment_type_str -- Return, Param, Summary, or None (if None, uses all comment types)
        ignore_ast -- Skip loading ASTs (they take a long time)"""
@@ -49,9 +49,10 @@ def load_processed_data(comment_type_str, ignore_ast):
         loaded = load_raw_data_from_path(path)
         category_high_level_details_path = os.path.join(DATA_PATH, 'resources', comment_type, 'high_level_details.json')
 
-        with open(category_high_level_details_path) as f:
-            category_high_level_details = json.load(f)
-        high_level_details.update(category_high_level_details)
+        if not skip_high_level:
+            with open(category_high_level_details_path) as f:
+                category_high_level_details = json.load(f)
+            high_level_details.update(category_high_level_details)
 
         if not ignore_ast:
             ast_path  = os.path.join(DATA_PATH, 'resources', comment_type, 'ast_objs.json')
