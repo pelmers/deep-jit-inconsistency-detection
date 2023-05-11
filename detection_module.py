@@ -23,6 +23,8 @@ class DetectionModule(nn.Module):
         self.output_layer = nn.Linear(feature_input_dimension, NUM_CLASSES)
         self.optimizer = torch.optim.Adam(self.parameters(), lr=LR)
 
+        self.negative_class_weight = 1
+
     def get_logprobs(self, encoder_outputs):
         """Computes the class-level log probabilities corresponding to the examples in the batch."""
         logits = self.output_layer(encoder_outputs.attended_old_nl_final_state)
@@ -140,9 +142,17 @@ class DetectionModule(nn.Module):
         accuracy = float(correct)/len(test_examples)
         precision, recall, f1 = compute_score(predicted_labels, gold_labels)
         
+        import sklearn
+        # make the sample_weights array the same size as the number of samples in the dataset, with 1 for positive and weight for negative
+        sample_weights = np.ones(len(gold_labels))
+        sample_weights[gold_labels == 0] = self.negative_class_weight
+        # now compute the weighted f1 score
+        weighted_f1 = sklearn.metrics.f1_score(gold_labels, predicted_labels, sample_weight=sample_weights)
+
         print('Precision: {}'.format(precision))
         print('Recall: {}'.format(recall))
         print('F1: {}'.format(f1))
+        print('Weighted F1: {}'.format(weighted_f1))
         print('Accuracy: {}\n'.format(accuracy))
 
         write_file = os.path.join(DETECTION_DIR, '{}_detection.txt'.format(model_name))
