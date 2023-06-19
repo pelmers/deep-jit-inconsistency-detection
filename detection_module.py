@@ -145,7 +145,7 @@ class DetectionModule(nn.Module):
         import sklearn
         # make the sample_weights array the same size as the number of samples in the dataset, with 1 for positive and weight for negative
         sample_weights = np.ones(len(gold_labels))
-        sample_weights[gold_labels == 0] = self.negative_class_weight
+        sample_weights[np.array(gold_labels) == 0] = self.negative_class_weight
         # now compute the weighted f1 score
         weighted_f1 = sklearn.metrics.f1_score(gold_labels, predicted_labels, sample_weight=sample_weights)
 
