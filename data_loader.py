@@ -95,4 +95,4 @@ def read_diff_examples_from_file(filename):
     """Reads saved data from filename"""
     with open(filename) as f:
         data = json.load(f)
-    return [DiffExample(**d) for d in data]
+    return [DiffExample(*(d[k] if k in d else 'Placeholder' for k in DiffExample._fields)) for d in data]
