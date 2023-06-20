@@ -2,7 +2,7 @@ from dpu_utils.mlutils import Vocabulary
 import numpy as np
 import torch
 from torch import nn
-from torch_scatter import scatter_add
+# from torch_scatter import scatter_add
 
 from constants import START, BEAM_SIZE
 from decoder import Decoder
